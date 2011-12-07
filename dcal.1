@@ -1,0 +1,75 @@
+.TH DCAL 1 dcal\-VERSION
+.SH NAME
+dcal \- dynamic calendar
+.SH SYNOPSIS
+.B dcal
+.RB [ \-b]
+.RB [ \-l]
+.RB [ \-fn
+.IR font ]
+.RB [ \-bg
+.IR color ]
+.RB [ \-cf
+.IR color ]
+.RB [ \-of
+.IR color ]
+.RB [ \-v ]
+.SH DESCRIPTION
+.B dcal
+is a dynamic calendar for X.  It shows the current month and allows you to
+navigate to other months.
+.SH OPTIONS
+.TP
+.BI \-b
+draws the calendar on the bottom of the screen.
+.TP
+.BI \-l
+draws the calendar on the left of the screen.
+.TP
+.BI \-fn " font"
+defines the font or font set used.
+.TP
+.BI \-nb " color"
+defines the background color.
+.IR #RGB ,
+.IR #RRGGBB ,
+and X color names are supported.
+.TP
+.BI \-cf " color"
+defines the current month foreground color.
+.TP
+.BI \-of " color"
+defines the other month foreground color.
+.TP
+.B \-v
+prints version information to stdout, then exits.
+.SH USAGE
+dcal is controlled exclusively by the keyboard.  The following commands are
+recognized:
+.TP
+.B Space
+Jump back to the current date.
+.TP
+.B H, Left
+Go back one day.
+.TP
+.B L, Right
+Go forward one day.
+.TP
+.B K, Up
+Go back one week.
+.TP
+.B J, Down
+Go forward one week.
+.TP
+.B Shift\-K
+Go back one month.
+.TP
+.B Shift\_J
+Go forward one month.
+.TP
+.B Escape, Q
+Exit dcal.
+.SH SEE ALSO
+.IR dwm (1),
+.IR dmenu (1)
