@@ -13,6 +13,10 @@ dcal \- dynamic calendar
 .IR color ]
 .RB [ \-of
 .IR color ]
+.RB [ \-x
+.IR offset ]
+.RB [ \-y
+.IR offset ]
 .RB [ \-v ]
 .SH DESCRIPTION
 .B dcal
@@ -40,6 +44,14 @@ defines the current month foreground color.
 .TP
 .BI \-of " color"
 defines the other month foreground color.
+.TP
+.BI \-x " offset"
+defines an offset in the horizontal direction to adjust where the calendar is
+shown
+.TP
+.BI \-y " offset"
+defines an offset in the vertical direction to adjust where the calendar is
+shown
 .TP
 .B \-v
 prints version information to stdout, then exits.

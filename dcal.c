@@ -42,6 +42,8 @@ static unsigned long invcol[ColLast];
 static Atom utf8;
 static Bool topbar = True;                    /* Draw on top */
 static Bool leftbar = False;                  /* Draw on left */
+static int offset_x = 0;                      /* x offset */
+static int offset_y = 0;                      /* y offset */
 static DC *dc;                                /* Drawing context */
 static Window win;                            /* Window */
 static XIC xic;
@@ -70,6 +72,10 @@ int main(int argc, char *argv[]) {
 			curfgcolor = argv[++i];
 		else if(!strcmp(argv[i], "-of"))  /* other month foreground color */
 			othfgcolor = argv[++i];
+    else if(!strcmp(argv[i], "-x"))   /* x offset */
+      offset_x = atoi(argv[++i]);
+    else if(!strcmp(argv[i], "-y"))   /* y offset */
+      offset_y = atoi(argv[++i]);
 		else
 			usage();
 
@@ -311,6 +317,10 @@ void setup(void) {
 		x = leftbar ? 0 : DisplayWidth( dc->dpy, screen) - cw;
 		y = topbar  ? 0 : DisplayHeight(dc->dpy, screen) - ch;
 	}
+
+  /* apply offsets */
+  x += offset_x;
+  y += offset_y;
 
 	/* create calendar window */
 	swa.override_redirect = True;
