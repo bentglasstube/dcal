@@ -5,6 +5,7 @@ dcal \- dynamic calendar
 .B dcal
 .RB [ \-b]
 .RB [ \-l]
+.RB [ \-k]
 .RB [ \-fn
 .IR font ]
 .RB [ \-bg
@@ -29,6 +30,9 @@ draws the calendar on the bottom of the screen.
 .TP
 .BI \-l
 draws the calendar on the left of the screen.
+.TP
+.BI \-k
+grab the keyboard and use it for input.
 .TP
 .BI \-fn " font"
 defines the font or font set used.
@@ -56,8 +60,8 @@ shown
 .B \-v
 prints version information to stdout, then exits.
 .SH USAGE
-dcal can be controlled via the mouse or the keyboard.  The following commands
-are recognized:
+dcal can be controlled via the mouse or the keyboard.  By default, the keyboard
+controls are not used.  The following commands are recognized:
 .TP
 .B Space
 Jump back to the current date.

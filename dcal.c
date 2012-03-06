@@ -42,6 +42,7 @@ static unsigned long invcol[ColLast];
 static Atom utf8;
 static Bool topbar = True;                    /* Draw on top */
 static Bool leftbar = False;                  /* Draw on left */
+static Bool keyboard = False;                 /* Use keyboard controls */
 static int offset_x = 0;                      /* x offset */
 static int offset_y = 0;                      /* y offset */
 static DC *dc;                                /* Drawing context */
@@ -61,6 +62,8 @@ int main(int argc, char *argv[]) {
 			topbar = False;
 		else if(!strcmp(argv[i], "-l"))   /* appears at the left of the screen */
 			leftbar = True;
+    else if(!strcmp(argv[i], "-k"))   /* use keyboard controls */
+      keyboard = True;
 		else if(i+1 == argc)
 			usage();
 		/* these options take one argument */
@@ -82,7 +85,7 @@ int main(int argc, char *argv[]) {
 	dc = initdc();
 	initfont(dc, font);
 
-  grabkeyboard();
+  if (keyboard) grabkeyboard();
 	setup();
 	run();
 
