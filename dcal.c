@@ -33,16 +33,17 @@ static void usage(void);
 static int ch, cw;                            /* Calendar height and width */
 static time_t current;                        /* Currently displayed time */
 static const char *font = NULL;               /* font */
-static const char *bgcolor = "#cccccc";       /* colors */
+static const char *bgcolor    = "#cccccc";    /* colors */
+static const char *bdcolor    = "#000000";
 static const char *curfgcolor = "#000000";
-static const char *othfgcolor  = "#ffffff";
+static const char *othfgcolor = "#ffffff";
 static unsigned long curcol[ColLast];
 static unsigned long othcol[ColLast];
 static unsigned long invcol[ColLast];
 static Atom utf8;
 static Bool topbar = True;                    /* Draw on top */
 static Bool leftbar = False;                  /* Draw on left */
-static Bool keyboard = False;                 /* Use keyboard controls */
+static Bool keyboard = True;                  /* Use keyboard controls */
 static int offset_x = 0;                      /* x offset */
 static int offset_y = 0;                      /* y offset */
 static DC *dc;                                /* Drawing context */
@@ -62,8 +63,8 @@ int main(int argc, char *argv[]) {
 			topbar = False;
 		else if(!strcmp(argv[i], "-l"))   /* appears at the left of the screen */
 			leftbar = True;
-    else if(!strcmp(argv[i], "-k"))   /* use keyboard controls */
-      keyboard = True;
+    else if(!strcmp(argv[i], "-k"))   /* suppress keyboard controls */
+      keyboard = False;
 		else if(i+1 == argc)
 			usage();
 		/* these options take one argument */
@@ -71,6 +72,8 @@ int main(int argc, char *argv[]) {
 			font = argv[++i];
 		else if(!strcmp(argv[i], "-bg"))  /* background color */
 			bgcolor = argv[++i];
+		else if(!strcmp(argv[i], "-bd"))  /* border color */
+			bdcolor = argv[++i];
 		else if(!strcmp(argv[i], "-cf"))  /* current month foreground color */
 			curfgcolor = argv[++i];
 		else if(!strcmp(argv[i], "-of"))  /* other month foreground color */
@@ -105,13 +108,14 @@ void drawcal(void) {
 	dc->h = ch;
   dc->w = cw;
 
-  /* clear background */
+  /* clear background and draw border */
 	drawrect(dc, 0, 0, cw, ch, True, BG(dc, curcol));
 
 	/* draw header */
   ti = localtime(&current);
   strftime(text, 20, "%B %Y", ti);
   dc->x = cw / 2 - textw(dc, text) / 2;
+  dc->y = 1;
   drawtext(dc, text, curcol);
 
   /* save current month and day */
@@ -127,13 +131,13 @@ void drawcal(void) {
   end = day + DAYS * 42;
 
   /* draw the calendar */
-  dc->y = 8;
+  dc->y = 9;
   while (day < end) {
     ti = localtime(&day);
 
     /* new line on sunday */
     if (ti->tm_wday == 0) {
-      dc->x = 0;
+      dc->x = 1;
       dc->y += dc->font.height + 2;
     }
 
@@ -154,6 +158,11 @@ void drawcal(void) {
     dc->x += 3 * (dc->font.width + 2);
     day += DAYS;
   }
+
+  /* draw border */
+  dc->x = 0;
+  dc->y = 0;
+  drawrect(dc, 0, 0, cw, ch, False, getcolor(dc, bdcolor));
 
 	mapdc(dc, win, cw, ch);
 }
@@ -279,8 +288,8 @@ void setup(void) {
   time(&current);
 
 	/* calculate calendar geometry */
-	ch =  7 * (dc->font.height + 2) + 8;
-  cw = 21 * (dc->font.width  + 2);
+	ch =  7 * (dc->font.height + 2) + 10;
+  cw = 21 * (dc->font.width  + 2) +  2;
 
 #ifdef XINERAMA
 	if((info = XineramaQueryScreens(dc->dpy, &n))) {
