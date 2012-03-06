@@ -1,3 +1,6 @@
 *.o
 dcal
 .*.swp
+dcal-git-*.tar.*
+pkg/
+src/
