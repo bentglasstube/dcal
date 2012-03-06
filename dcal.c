@@ -208,6 +208,20 @@ void keypress(XKeyEvent *ev) {
 	drawcal();
 }
 
+void buttonpress(XButtonEvent *ev) {
+  switch (ev->button) {
+    case Button3:
+      exit(EXIT_SUCCESS);
+    case Button4:
+      prev_month();
+      break;
+    case Button5:
+      next_month();
+      break;
+  }
+  drawcal();
+}
+
 void run(void) {
 	XEvent ev;
 
@@ -222,6 +236,9 @@ void run(void) {
 		case KeyPress:
 			keypress(&ev.xkey);
 			break;
+    case ButtonPress:
+      buttonpress(&ev.xbutton);
+      break;
 		case VisibilityNotify:
 			if(ev.xvisibility.state != VisibilityUnobscured)
 				XRaiseWindow(dc->dpy, win);
@@ -295,10 +312,10 @@ void setup(void) {
 		y = topbar  ? 0 : DisplayHeight(dc->dpy, screen) - ch;
 	}
 
-	/* create menu window */
+	/* create calendar window */
 	swa.override_redirect = True;
 	swa.background_pixmap = ParentRelative;
-	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
+	swa.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | VisibilityChangeMask;
 	win = XCreateWindow(dc->dpy, root, x, y, cw, ch, 0,
 	                    DefaultDepth(dc->dpy, screen), CopyFromParent,
 	                    DefaultVisual(dc->dpy, screen),
