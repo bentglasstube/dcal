@@ -340,7 +340,7 @@ void next_month(void) {
   mday = ti->tm_mday;
 
   /* estimate 30 days */
-  current += DAYS * 30;
+  current += DAYS * 31;
   ti = localtime(&current);
 
   /* add difference */
