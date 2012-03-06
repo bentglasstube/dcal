@@ -2,7 +2,7 @@
 pkgname=dcal-git
 pkgver=1
 pkgrel=1
-pkgdsec="A generic calendar for X"
+pkgdesc="A generic calendar for X"
 url="https://git.eatabrick.org/dcal.git/"
 license='MIT'
 arch=('i686' 'x86_64')
