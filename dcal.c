@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 	for(i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if(!strcmp(argv[i], "-v")) {      /* prints version information */
-			puts("dcal-"VERSION", © 2011 Alan Berndt, see LICENSE for details");
+			puts("dcal-"VERSION", © 2012 Alan Berndt, see LICENSE for details");
 			exit(EXIT_SUCCESS);
 		}
 		else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
