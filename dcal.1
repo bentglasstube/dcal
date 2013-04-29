@@ -16,11 +16,19 @@ dcal \- dynamic calendar
 .IR color ]
 .RB [ \-of
 .IR color ]
+.RB [ \-tf
+.IR color ]
+.RB [ \-hf
+.IR color ]
 .RB [ \-x
 .IR offset ]
 .RB [ \-y
 .IR offset ]
-.RB [ \-v ]
+.RB [ dates ]
+.sp
+.B dcal -h
+.sp
+.B dcal -v
 .SH DESCRIPTION
 .B dcal
 is a dynamic calendar for X.  It shows the current month and allows you to
@@ -54,16 +62,29 @@ defines the current month foreground color.
 .BI \-of " color"
 defines the other month foreground color.
 .TP
+.BI \-cf " color"
+defines the forgeround color for today.
+.TP
+.BI \-hf " color"
+defines the foreground color for hilights.
+.TP
 .BI \-x " offset"
 defines an offset in the horizontal direction to adjust where the calendar is
-shown
+shown.
 .TP
 .BI \-y " offset"
 defines an offset in the vertical direction to adjust where the calendar is
-shown
+shown.
+.TP
+.B \-h
+prints usage information to stdout, then exits.
 .TP
 .B \-v
 prints version information to stdout, then exits.
+.SH IMPORTANT DATES
+Any other arguments are taken to be important dates that will be drawn with the
+hilight color.  The dates should be formatted as YYYYMMDD without any
+separators.  Only 32 dates are supported, any more will be ignored.
 .SH USAGE
 dcal can be controlled via the mouse or the keyboard.  The following commands
 are recognized:

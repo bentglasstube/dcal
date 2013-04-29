@@ -14,7 +14,8 @@
 #endif
 #include "draw.h"
 
-#define DAYS    86400
+#define DAYS        86400
+#define HILIGHT_MAX 32
 
 #define INTERSECT(x,y,w,h,r)  (MAX(0, MIN((x)+(w),(r).x_org+(r).width)  - MAX((x),(r).x_org)) \
                              * MAX(0, MIN((y)+(h),(r).y_org+(r).height) - MAX((y),(r).y_org)))
@@ -29,6 +30,7 @@ static void setup(void);
 static void next_month(void);
 static void prev_month(void);
 static void usage(void);
+static unsigned long* pickcolor(const char *date, const char *current);
 
 static int ch, cw;                            /* Calendar height and width */
 static time_t current;                        /* Currently displayed time */
@@ -37,8 +39,12 @@ static const char *bgcolor    = "#cccccc";    /* colors */
 static const char *bdcolor    = "#000000";
 static const char *curfgcolor = "#000000";
 static const char *othfgcolor = "#ffffff";
+static const char *todfgcolor = "#ff0000";
+static const char *hltfgcolor = "#0000ff";
 static unsigned long curcol[ColLast];
 static unsigned long othcol[ColLast];
+static unsigned long todcol[ColLast];
+static unsigned long hltcol[ColLast];
 static unsigned long invcol[ColLast];
 static Atom utf8;
 static Bool topbar = True;                    /* Draw on top */
@@ -49,14 +55,21 @@ static int offset_y = 0;                      /* y offset */
 static DC *dc;                                /* Drawing context */
 static Window win;                            /* Window */
 static XIC xic;
+static char today[9];                         /* Current date when run */
+static char hilight[HILIGHT_MAX][9];          /* Date for hilighting */
+static int hilight_count = 0;                 /* Number of dates to hilight */
 
 int main(int argc, char *argv[]) {
   int i;
 
-  for(i = 1; i < argc; i++)
+  for(i = 1; i < argc; i++) {
     /* these options take no arguments */
     if(!strcmp(argv[i], "-v")) {      /* prints version information */
       puts("dcal-"VERSION", © 2012 Alan Berndt, see LICENSE for details");
+      exit(EXIT_SUCCESS);
+    }
+    else if(!strcmp(argv[i], "-h")) { /* prints usage information */
+      usage();
       exit(EXIT_SUCCESS);
     }
     else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
@@ -65,8 +78,6 @@ int main(int argc, char *argv[]) {
       leftbar = True;
     else if(!strcmp(argv[i], "-k"))   /* suppress keyboard controls */
       keyboard = False;
-    else if(i+1 == argc)
-      usage();
     /* these options take one argument */
     else if(!strcmp(argv[i], "-fn"))  /* font or font set */
       font = argv[++i];
@@ -78,12 +89,18 @@ int main(int argc, char *argv[]) {
       curfgcolor = argv[++i];
     else if(!strcmp(argv[i], "-of"))  /* other month foreground color */
       othfgcolor = argv[++i];
+    else if(!strcmp(argv[i], "-tf"))  /* today foreground color */
+      todfgcolor = argv[++i];
+    else if(!strcmp(argv[i], "-hf"))  /* hilight foreground color */
+      hltfgcolor = argv[++i];
     else if(!strcmp(argv[i], "-x"))   /* x offset */
       offset_x = atoi(argv[++i]);
     else if(!strcmp(argv[i], "-y"))   /* y offset */
       offset_y = atoi(argv[++i]);
-    else
-      usage();
+    /* the rest are dates to hilight */
+    else if(hilight_count < HILIGHT_MAX)
+        strncpy(hilight[hilight_count++], argv[i], 9);
+  }
 
   dc = initdc();
   initfont(dc, font);
@@ -95,24 +112,12 @@ int main(int argc, char *argv[]) {
   return EXIT_FAILURE; /* unreachable */
 }
 
-unsigned long * pickcolor(struct tm *ti, int month, int mday) {
-  if (ti->tm_mon == month) {
-    if (ti->tm_mday == mday) {
-      return invcol;
-    } else {
-      return curcol;
-    }
-  } else {
-    return othcol;
-  }
-}
-
 void drawcal(void) {
-  int month, mday;
   time_t day, end;
   struct tm *ti;
   unsigned long *color;
   char text[20];
+  char curdate[10];
 
   /* set up drawing context */
   dc->x = 0;
@@ -130,9 +135,8 @@ void drawcal(void) {
   dc->y = 1;
   drawtext(dc, text, curcol);
 
-  /* save current month and day */
-  month = ti->tm_mon;
-  mday  = ti->tm_mday;
+  /* save selected date */
+  strftime(curdate, 10, "%Y%m%d", ti);
 
   /* find first of month */
   day = current - DAYS * ti->tm_mday - 3600 * ti->tm_hour - 60 * ti->tm_min - ti->tm_sec;
@@ -154,7 +158,8 @@ void drawcal(void) {
     }
 
     /* pick color */
-    color = pickcolor(ti, month, mday);
+    strftime(text, 20, "%Y%m%d", ti);
+    color = pickcolor(text, curdate);
 
     /* write the date */
     strftime(text, 20, "%d", ti);
@@ -272,6 +277,7 @@ void run(void) {
 
 void setup(void) {
   int x, y, screen = DefaultScreen(dc->dpy);
+  struct tm* ti;
   Window root = RootWindow(dc->dpy, screen);
   XSetWindowAttributes swa;
   XIM xim;
@@ -284,13 +290,19 @@ void setup(void) {
   curcol[ColFG] = getcolor(dc, curfgcolor);
   othcol[ColBG] = getcolor(dc, bgcolor);
   othcol[ColFG] = getcolor(dc, othfgcolor);
+  todcol[ColFG] = getcolor(dc, todfgcolor);
+  todcol[ColBG] = getcolor(dc, bgcolor);
+  hltcol[ColFG] = getcolor(dc, hltfgcolor);
+  hltcol[ColBG] = getcolor(dc, bgcolor);
   invcol[ColBG] = getcolor(dc, curfgcolor);
   invcol[ColFG] = getcolor(dc, bgcolor);
 
   utf8 = XInternAtom(dc->dpy, "UTF8_STRING", False);
 
-  /* default to current time */
+  /* default to and save current time */
   time(&current);
+  ti = localtime(&current);
+  strftime(today, 9, "%Y%m%d", ti);
 
   /* calculate calendar geometry */
   ch =  7 * (dc->font.height + 2) + 10;
@@ -393,4 +405,15 @@ void prev_month(void) {
 void usage(void) {
   fputs("usage: dcal [-b] [-l] [-fn font] [-bg color] [-cf color] [-of color] [-v]\n", stderr);
   exit(EXIT_FAILURE);
+}
+
+unsigned long* pickcolor(const char *date, const char *current) {
+  int i;
+
+  if (keyboard && !strcmp(date, current)) return invcol;
+  for (i = 0; i < hilight_count; ++i)
+    if (!strcmp(date, hilight[i])) return hltcol;
+  if (!strcmp(date, today)) return todcol;
+  if (!strncmp(date, current, 6)) return curcol;
+  return othcol;
 }
