@@ -31,7 +31,7 @@ clean:
 dist: clean
 	@echo creating dist tarball
 	@mkdir -p dcal-${VERSION}
-	@cp LICENSE Makefile README config.mk dcal.1 draw.h ${SRC} dcal-${VERSION}
+	@cp LICENSE Makefile README.md config.mk dcal.1 draw.h ${SRC} dcal-${VERSION}
 	@tar -cf dcal-${VERSION}.tar dcal-${VERSION}
 	@gzip dcal-${VERSION}.tar
 	@rm -rf dcal-${VERSION}
