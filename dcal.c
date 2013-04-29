@@ -51,48 +51,48 @@ static Window win;                            /* Window */
 static XIC xic;
 
 int main(int argc, char *argv[]) {
-	int i;
+  int i;
 
-	for(i = 1; i < argc; i++)
-		/* these options take no arguments */
-		if(!strcmp(argv[i], "-v")) {      /* prints version information */
-			puts("dcal-"VERSION", © 2012 Alan Berndt, see LICENSE for details");
-			exit(EXIT_SUCCESS);
-		}
-		else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
-			topbar = False;
-		else if(!strcmp(argv[i], "-l"))   /* appears at the left of the screen */
-			leftbar = True;
+  for(i = 1; i < argc; i++)
+    /* these options take no arguments */
+    if(!strcmp(argv[i], "-v")) {      /* prints version information */
+      puts("dcal-"VERSION", © 2012 Alan Berndt, see LICENSE for details");
+      exit(EXIT_SUCCESS);
+    }
+    else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
+      topbar = False;
+    else if(!strcmp(argv[i], "-l"))   /* appears at the left of the screen */
+      leftbar = True;
     else if(!strcmp(argv[i], "-k"))   /* suppress keyboard controls */
       keyboard = False;
-		else if(i+1 == argc)
-			usage();
-		/* these options take one argument */
-		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
-			font = argv[++i];
-		else if(!strcmp(argv[i], "-bg"))  /* background color */
-			bgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-bd"))  /* border color */
-			bdcolor = argv[++i];
-		else if(!strcmp(argv[i], "-cf"))  /* current month foreground color */
-			curfgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-of"))  /* other month foreground color */
-			othfgcolor = argv[++i];
+    else if(i+1 == argc)
+      usage();
+    /* these options take one argument */
+    else if(!strcmp(argv[i], "-fn"))  /* font or font set */
+      font = argv[++i];
+    else if(!strcmp(argv[i], "-bg"))  /* background color */
+      bgcolor = argv[++i];
+    else if(!strcmp(argv[i], "-bd"))  /* border color */
+      bdcolor = argv[++i];
+    else if(!strcmp(argv[i], "-cf"))  /* current month foreground color */
+      curfgcolor = argv[++i];
+    else if(!strcmp(argv[i], "-of"))  /* other month foreground color */
+      othfgcolor = argv[++i];
     else if(!strcmp(argv[i], "-x"))   /* x offset */
       offset_x = atoi(argv[++i]);
     else if(!strcmp(argv[i], "-y"))   /* y offset */
       offset_y = atoi(argv[++i]);
-		else
-			usage();
+    else
+      usage();
 
-	dc = initdc();
-	initfont(dc, font);
+  dc = initdc();
+  initfont(dc, font);
 
   if (keyboard) grabkeyboard();
-	setup();
-	run();
+  setup();
+  run();
 
-	return EXIT_FAILURE; /* unreachable */
+  return EXIT_FAILURE; /* unreachable */
 }
 
 void drawcal(void) {
@@ -103,15 +103,15 @@ void drawcal(void) {
   char text[20];
 
   /* set up drawing context */
-	dc->x = 0;
-	dc->y = 0;
-	dc->h = ch;
+  dc->x = 0;
+  dc->y = 0;
+  dc->h = ch;
   dc->w = cw;
 
   /* clear background and draw border */
-	drawrect(dc, 0, 0, cw, ch, True, BG(dc, curcol));
+  drawrect(dc, 0, 0, cw, ch, True, BG(dc, curcol));
 
-	/* draw header */
+  /* draw header */
   ti = localtime(&current);
   strftime(text, 20, "%B %Y", ti);
   dc->x = cw / 2 - textw(dc, text) / 2;
@@ -164,33 +164,33 @@ void drawcal(void) {
   dc->y = 0;
   drawrect(dc, 0, 0, cw, ch, False, getcolor(dc, bdcolor));
 
-	mapdc(dc, win, cw, ch);
+  mapdc(dc, win, cw, ch);
 }
 
 void grabkeyboard(void) {
-	int i;
+  int i;
 
-	/* try to grab keyboard, we may have to wait for another process to ungrab */
-	for(i = 0; i < 1000; i++) {
-		if(XGrabKeyboard(dc->dpy, DefaultRootWindow(dc->dpy), True,
-		                 GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
-			return;
-		usleep(1000);
-	}
-	eprintf("cannot grab keyboard\n");
+  /* try to grab keyboard, we may have to wait for another process to ungrab */
+  for(i = 0; i < 1000; i++) {
+    if(XGrabKeyboard(dc->dpy, DefaultRootWindow(dc->dpy), True,
+                     GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
+      return;
+    usleep(1000);
+  }
+  eprintf("cannot grab keyboard\n");
 }
 
 void keypress(XKeyEvent *ev) {
-	char buf[32];
-	int len;
-	KeySym ksym = NoSymbol;
-	Status status;
+  char buf[32];
+  int len;
+  KeySym ksym = NoSymbol;
+  Status status;
 
-	len = XmbLookupString(xic, ev, buf, sizeof buf, &ksym, &status);
-	if(status == XBufferOverflow)
-		return;
+  len = XmbLookupString(xic, ev, buf, sizeof buf, &ksym, &status);
+  if(status == XBufferOverflow)
+    return;
 
-	switch(ksym) {
+  switch(ksym) {
     case XK_Return:
     case XK_KP_Enter:
     case XK_Escape:
@@ -222,8 +222,8 @@ void keypress(XKeyEvent *ev) {
     case XK_J:                  /* forward one month */
       next_month();
       break;
-	}
-	drawcal();
+  }
+  drawcal();
 }
 
 void buttonpress(XButtonEvent *ev) {
@@ -241,116 +241,116 @@ void buttonpress(XButtonEvent *ev) {
 }
 
 void run(void) {
-	XEvent ev;
+  XEvent ev;
 
-	while(!XNextEvent(dc->dpy, &ev)) {
-		if(XFilterEvent(&ev, win))
-			continue;
-		switch(ev.type) {
-		case Expose:
-			if(ev.xexpose.count == 0)
-				mapdc(dc, win, cw, ch);
-			break;
-		case KeyPress:
-			keypress(&ev.xkey);
-			break;
+  while(!XNextEvent(dc->dpy, &ev)) {
+    if(XFilterEvent(&ev, win))
+      continue;
+    switch(ev.type) {
+    case Expose:
+      if(ev.xexpose.count == 0)
+        mapdc(dc, win, cw, ch);
+      break;
+    case KeyPress:
+      keypress(&ev.xkey);
+      break;
     case ButtonPress:
       buttonpress(&ev.xbutton);
       break;
-		case VisibilityNotify:
-			if(ev.xvisibility.state != VisibilityUnobscured)
-				XRaiseWindow(dc->dpy, win);
-			break;
-		}
-	}
+    case VisibilityNotify:
+      if(ev.xvisibility.state != VisibilityUnobscured)
+        XRaiseWindow(dc->dpy, win);
+      break;
+    }
+  }
 }
 
 void setup(void) {
-	int x, y, screen = DefaultScreen(dc->dpy);
-	Window root = RootWindow(dc->dpy, screen);
-	XSetWindowAttributes swa;
-	XIM xim;
+  int x, y, screen = DefaultScreen(dc->dpy);
+  Window root = RootWindow(dc->dpy, screen);
+  XSetWindowAttributes swa;
+  XIM xim;
 #ifdef XINERAMA
-	int n;
-	XineramaScreenInfo *info;
+  int n;
+  XineramaScreenInfo *info;
 #endif
 
-	curcol[ColBG] = getcolor(dc, bgcolor);
-	curcol[ColFG] = getcolor(dc, curfgcolor);
-	othcol[ColBG] = getcolor(dc, bgcolor);
-	othcol[ColFG] = getcolor(dc, othfgcolor);
+  curcol[ColBG] = getcolor(dc, bgcolor);
+  curcol[ColFG] = getcolor(dc, curfgcolor);
+  othcol[ColBG] = getcolor(dc, bgcolor);
+  othcol[ColFG] = getcolor(dc, othfgcolor);
   invcol[ColBG] = getcolor(dc, curfgcolor);
   invcol[ColFG] = getcolor(dc, bgcolor);
 
-	utf8 = XInternAtom(dc->dpy, "UTF8_STRING", False);
+  utf8 = XInternAtom(dc->dpy, "UTF8_STRING", False);
 
   /* default to current time */
   time(&current);
 
-	/* calculate calendar geometry */
-	ch =  7 * (dc->font.height + 2) + 10;
+  /* calculate calendar geometry */
+  ch =  7 * (dc->font.height + 2) + 10;
   cw = 21 * (dc->font.width  + 2) +  2;
 
 #ifdef XINERAMA
-	if((info = XineramaQueryScreens(dc->dpy, &n))) {
-		int a, j, di, i = 0, area = 0;
-		unsigned int du;
-		Window w, pw, dw, *dws;
-		XWindowAttributes wa;
+  if((info = XineramaQueryScreens(dc->dpy, &n))) {
+    int a, j, di, i = 0, area = 0;
+    unsigned int du;
+    Window w, pw, dw, *dws;
+    XWindowAttributes wa;
 
-		XGetInputFocus(dc->dpy, &w, &di);
-		if(w != root && w != PointerRoot && w != None) {
-			/* find top-level window containing current input focus */
-			do {
-				if(XQueryTree(dc->dpy, (pw = w), &dw, &w, &dws, &du) && dws)
-					XFree(dws);
-			} while(w != root && w != pw);
-			/* find xinerama screen with which the window intersects most */
-			if(XGetWindowAttributes(dc->dpy, pw, &wa))
-				for(j = 0; j < n; j++)
-					if((a = INTERSECT(wa.x, wa.y, wa.width, wa.height, info[j])) > area) {
-						area = a;
-						i = j;
-					}
-		}
-		/* no focused window is on screen, so use pointer location instead */
-		if(!area && XQueryPointer(dc->dpy, root, &dw, &dw, &x, &y, &di, &di, &du))
-			for(i = 0; i < n; i++)
-				if(INTERSECT(x, y, 1, 1, info[i]))
-					break;
+    XGetInputFocus(dc->dpy, &w, &di);
+    if(w != root && w != PointerRoot && w != None) {
+      /* find top-level window containing current input focus */
+      do {
+        if(XQueryTree(dc->dpy, (pw = w), &dw, &w, &dws, &du) && dws)
+          XFree(dws);
+      } while(w != root && w != pw);
+      /* find xinerama screen with which the window intersects most */
+      if(XGetWindowAttributes(dc->dpy, pw, &wa))
+        for(j = 0; j < n; j++)
+          if((a = INTERSECT(wa.x, wa.y, wa.width, wa.height, info[j])) > area) {
+            area = a;
+            i = j;
+          }
+    }
+    /* no focused window is on screen, so use pointer location instead */
+    if(!area && XQueryPointer(dc->dpy, root, &dw, &dw, &x, &y, &di, &di, &du))
+      for(i = 0; i < n; i++)
+        if(INTERSECT(x, y, 1, 1, info[i]))
+          break;
 
-		x = info[i].x_org + (leftbar ? 0 : info[i].width  - cw);
-		y = info[i].y_org + (topbar  ? 0 : info[i].height - ch);
-		XFree(info);
-	}
-	else
+    x = info[i].x_org + (leftbar ? 0 : info[i].width  - cw);
+    y = info[i].y_org + (topbar  ? 0 : info[i].height - ch);
+    XFree(info);
+  }
+  else
 #endif
-	{
-		x = leftbar ? 0 : DisplayWidth( dc->dpy, screen) - cw;
-		y = topbar  ? 0 : DisplayHeight(dc->dpy, screen) - ch;
-	}
+  {
+    x = leftbar ? 0 : DisplayWidth( dc->dpy, screen) - cw;
+    y = topbar  ? 0 : DisplayHeight(dc->dpy, screen) - ch;
+  }
 
   /* apply offsets */
   x += offset_x;
   y += offset_y;
 
-	/* create calendar window */
-	swa.override_redirect = True;
-	swa.background_pixmap = ParentRelative;
-	swa.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | VisibilityChangeMask;
-	win = XCreateWindow(dc->dpy, root, x, y, cw, ch, 0,
-	                    DefaultDepth(dc->dpy, screen), CopyFromParent,
-	                    DefaultVisual(dc->dpy, screen),
-	                    CWOverrideRedirect | CWBackPixmap | CWEventMask, &swa);
+  /* create calendar window */
+  swa.override_redirect = True;
+  swa.background_pixmap = ParentRelative;
+  swa.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | VisibilityChangeMask;
+  win = XCreateWindow(dc->dpy, root, x, y, cw, ch, 0,
+                      DefaultDepth(dc->dpy, screen), CopyFromParent,
+                      DefaultVisual(dc->dpy, screen),
+                      CWOverrideRedirect | CWBackPixmap | CWEventMask, &swa);
 
-	/* open input methods */
-	xim = XOpenIM(dc->dpy, NULL, NULL, NULL);
-	xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
-	                XNClientWindow, win, XNFocusWindow, win, NULL);
+  /* open input methods */
+  xim = XOpenIM(dc->dpy, NULL, NULL, NULL);
+  xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+                  XNClientWindow, win, XNFocusWindow, win, NULL);
 
-	XMapRaised(dc->dpy, win);
-	resizedc(dc, cw, ch);
-	drawcal();
+  XMapRaised(dc->dpy, win);
+  resizedc(dc, cw, ch);
+  drawcal();
 }
 
 void next_month(void) {
@@ -386,6 +386,6 @@ void prev_month(void) {
 }
 
 void usage(void) {
-	fputs("usage: dcal [-b] [-l] [-fn font] [-bg color] [-cf color] [-of color] [-v]\n", stderr);
-	exit(EXIT_FAILURE);
+  fputs("usage: dcal [-b] [-l] [-fn font] [-bg color] [-cf color] [-of color] [-v]\n", stderr);
+  exit(EXIT_FAILURE);
 }
