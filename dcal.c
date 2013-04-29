@@ -95,6 +95,18 @@ int main(int argc, char *argv[]) {
   return EXIT_FAILURE; /* unreachable */
 }
 
+unsigned long * pickcolor(struct tm *ti, int month, int mday) {
+  if (ti->tm_mon == month) {
+    if (ti->tm_mday == mday) {
+      return invcol;
+    } else {
+      return curcol;
+    }
+  } else {
+    return othcol;
+  }
+}
+
 void drawcal(void) {
   int month, mday;
   time_t day, end;
@@ -142,13 +154,7 @@ void drawcal(void) {
     }
 
     /* pick color */
-    if (ti->tm_mon == month) {
-      if (ti->tm_mday == mday)
-        color = invcol;
-      else
-        color = curcol;
-    } else
-      color = othcol;
+    color = pickcolor(ti, month, mday);
 
     /* write the date */
     strftime(text, 20, "%d", ti);
@@ -182,11 +188,10 @@ void grabkeyboard(void) {
 
 void keypress(XKeyEvent *ev) {
   char buf[32];
-  int len;
   KeySym ksym = NoSymbol;
   Status status;
 
-  len = XmbLookupString(xic, ev, buf, sizeof buf, &ksym, &status);
+  XmbLookupString(xic, ev, buf, sizeof buf, &ksym, &status);
   if(status == XBufferOverflow)
     return;
 
