@@ -10,13 +10,12 @@ In order to build dcal you need the Xlib header files.
 Installation
 ------------
 Edit config.mk to match your local setup (dcal is installed into
-the /usr/local namespace by default).
+the /usr namespace by default).
 
 Afterwards enter the following command to build and install dcal
 (if necessary as root):
 
     make clean install
-
 
 Running dcal
 -------------
