@@ -18,5 +18,12 @@ Afterwards enter the following command to build and install dcal
     make clean install
 
 Running dcal
--------------
+------------
 See the man page for details.
+
+Screenshot
+----------
+
+![screenshot](https://raw.github.com/bentglasstube/dcal/master/screenshot.png)
+
+This is what mine looks like, but it's quite configurable
