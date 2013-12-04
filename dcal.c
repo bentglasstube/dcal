@@ -403,7 +403,7 @@ void prev_month(void) {
 }
 
 void usage(void) {
-  fputs("usage: dcal [-b] [-l] [-fn font] [-bg color] [-cf color] [-of color] [-v]\n", stderr);
+  fputs("usage: dcal [-b] [-l] [-fn font] [-bg color] [-cf color] [-of color] [-tf color] [-hf color] [-v]\n", stderr);
   exit(EXIT_FAILURE);
 }
 
