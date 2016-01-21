@@ -14,7 +14,6 @@
 #endif
 #include "draw.h"
 
-#define DAYS        86400
 #define HILIGHT_MAX 32
 
 #define INTERSECT(x,y,w,h,r)  (MAX(0, MIN((x)+(w),(r).x_org+(r).width)  - MAX((x),(r).x_org)) \
@@ -22,13 +21,13 @@
 #define MIN(a,b)              ((a) < (b) ? (a) : (b))
 #define MAX(a,b)              ((a) > (b) ? (a) : (b))
 
+static void adddays(time_t *d, int count);
+static void addmonths(time_t *d, int count);
 static void drawcal(void);
 static void grabkeyboard(void);
 static void keypress(XKeyEvent *ev);
 static void run(void);
 static void setup(void);
-static void next_month(void);
-static void prev_month(void);
 static void usage(void);
 static unsigned long* pickcolor(const char *date, const char *current);
 
@@ -112,6 +111,22 @@ int main(int argc, char *argv[]) {
   return EXIT_FAILURE; /* unreachable */
 }
 
+void adddays(time_t *d, int count) {
+  struct tm *t;
+
+  t = localtime(d);
+  t->tm_mday += count;
+  *d = mktime(t);
+}
+
+void addmonths(time_t *d, int count) {
+  struct tm *t;
+
+  t = localtime(d);
+  t->tm_mon += count;
+  *d = mktime(t);
+}
+
 void drawcal(void) {
   time_t day, end;
   struct tm *ti;
@@ -139,12 +154,18 @@ void drawcal(void) {
   strftime(curdate, 10, "%Y%m%d", ti);
 
   /* find first of month */
-  day = current - DAYS * ti->tm_mday - 3600 * ti->tm_hour - 60 * ti->tm_min - ti->tm_sec;
+  ti->tm_mday = 1;
+  mktime(ti);
 
   /* find first day of first week */
-  ti = localtime(&day);
-  day -= DAYS * ti->tm_wday;
-  end = day + DAYS * 42;
+  ti->tm_mday -= ti->tm_wday;
+
+  day = mktime(ti);
+  fprintf(stderr, "Drawing from %s", asctime(ti));
+
+  ti->tm_mday += 42;
+  end = mktime(ti);
+  fprintf(stderr, "Drawing thru %s", asctime(ti));
 
   /* draw the calendar */
   dc->y = 9;
@@ -167,7 +188,7 @@ void drawcal(void) {
 
     /* increment */
     dc->x += 3 * (dc->font.width + 2);
-    day += DAYS;
+    adddays(&day, 1);
   }
 
   /* draw border */
@@ -212,25 +233,25 @@ void keypress(XKeyEvent *ev) {
       break;
     case XK_Left:               /* back one day */
     case XK_h:
-      current -= DAYS;
+      adddays(&current, -1);
       break;
     case XK_Right:              /* forward one day */
     case XK_l:
-      current += DAYS;
+      adddays(&current, 1);
       break;
     case XK_Up:                 /* back one week */
     case XK_k:
-      current -= DAYS * 7;
+      adddays(&current, -7);
       break;
     case XK_Down:               /* forward one week */
     case XK_j:
-      current += DAYS * 7;
+      adddays(&current, 7);
       break;
     case XK_K:                  /* back one month */
-      prev_month();
+      addmonths(&current, -1);
       break;
     case XK_J:                  /* forward one month */
-      next_month();
+      addmonths(&current, 1);
       break;
   }
   drawcal();
@@ -241,10 +262,10 @@ void buttonpress(XButtonEvent *ev) {
     case Button3:
       exit(EXIT_SUCCESS);
     case Button4:
-      prev_month();
+      addmonths(&current, -1);
       break;
     case Button5:
-      next_month();
+      addmonths(&current, 1);
       break;
   }
   drawcal();
@@ -368,38 +389,6 @@ void setup(void) {
   XMapRaised(dc->dpy, win);
   resizedc(dc, cw, ch);
   drawcal();
-}
-
-void next_month(void) {
-  struct tm *ti;
-  int mday;
-
-  /* save current mday */
-  ti = localtime(&current);
-  mday = ti->tm_mday;
-
-  /* estimate 30 days */
-  current += DAYS * 31;
-  ti = localtime(&current);
-
-  /* add difference */
-  current += DAYS * (mday - ti->tm_mday);
-}
-
-void prev_month(void) {
-  struct tm *ti;
-  int mday;
-
-  /* save current mday */
-  ti = localtime(&current);
-  mday = ti->tm_mday;
-
-  /* estimate 30 days */
-  current -= DAYS * 30;
-  ti = localtime(&current);
-
-  /* reconcile */
-  current += DAYS * (mday - ti->tm_mday);
 }
 
 void usage(void) {
